@@ -42,7 +42,7 @@ public class TestCreateUser {
     Gson g = new Gson();
     @Before
     public void setUp() {
-        RestAssured.baseURI = Uri.BASEURI;
+        RestAssured.baseURI = Constants.BASEURI;
     }
 
     @Test

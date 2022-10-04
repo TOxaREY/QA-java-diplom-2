@@ -20,7 +20,7 @@ import static org.hamcrest.core.Is.is;
 public class TestUpdateDateUser {
     private String accessToken;
 
-    private Response responseCreate(File json) {
+    private Response responseCreateUser(File json) {
         return given().header("Content-type", "application/json")
                 .and()
                 .body(json)
@@ -63,14 +63,14 @@ public class TestUpdateDateUser {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = Uri.BASEURI;
+        RestAssured.baseURI = Constants.BASEURI;
     }
 
     @Test
     @DisplayName("Тест изменения поля email пользователя с авторизацией")
     public void testUpdateEmailFieldUserWithAuthorization() throws FileNotFoundException {
         File json = new File("src/test/resources/userFull.json");
-        Response response = responseCreate(json);
+        Response response = responseCreateUser(json);
         setAccessToken(response);
         File jsonNewEmail = new File("src/test/resources/userNewEmail.json");
         BufferedReader br = new BufferedReader(new FileReader("src/test/resources/userNewEmail.json"));
@@ -89,7 +89,7 @@ public class TestUpdateDateUser {
     @DisplayName("Тест изменения поля password пользователя с авторизацией")
     public void testUpdatePasswordFieldUserWithAuthorization() throws FileNotFoundException {
         File json = new File("src/test/resources/userFull.json");
-        Response response = responseCreate(json);
+        Response response = responseCreateUser(json);
         setAccessToken(response);
         File jsonNewPassword = new File("src/test/resources/userNewPassword.json");
         BufferedReader br = new BufferedReader(new FileReader("src/test/resources/userNewPassword.json"));
@@ -108,7 +108,7 @@ public class TestUpdateDateUser {
     @DisplayName("Тест изменения поля name пользователя с авторизацией")
     public void testUpdateNameFieldUserWithAuthorization() throws FileNotFoundException {
         File json = new File("src/test/resources/userFull.json");
-        Response response = responseCreate(json);
+        Response response = responseCreateUser(json);
         setAccessToken(response);
         File jsonNewName = new File("src/test/resources/userNewName.json");
         BufferedReader br = new BufferedReader(new FileReader("src/test/resources/userNewName.json"));
@@ -127,7 +127,7 @@ public class TestUpdateDateUser {
     @DisplayName("Тест изменения поля email пользователя без авторизации")
     public void testUpdateEmailFieldUserWithoutAuthorization() {
         File json = new File("src/test/resources/userFull.json");
-        Response response = responseCreate(json);
+        Response response = responseCreateUser(json);
         setAccessToken(response);
         File jsonNewEmail = new File("src/test/resources/userNewEmail.json");
         testNegative(responseUpdateWithoutAuthorization(jsonNewEmail));
@@ -137,7 +137,7 @@ public class TestUpdateDateUser {
     @DisplayName("Тест изменения поля password пользователя без авторизации")
     public void testUpdatePasswordFieldUserWithoutAuthorization() {
         File json = new File("src/test/resources/userFull.json");
-        Response response = responseCreate(json);
+        Response response = responseCreateUser(json);
         setAccessToken(response);
         File jsonNewPassword = new File("src/test/resources/userNewPassword.json");
         testNegative(responseUpdateWithoutAuthorization(jsonNewPassword));
@@ -147,7 +147,7 @@ public class TestUpdateDateUser {
     @DisplayName("Тест изменения поля name пользователя без авторизации")
     public void testUpdateNameFieldUserWithoutAuthorization() {
         File json = new File("src/test/resources/userFull.json");
-        Response response = responseCreate(json);
+        Response response = responseCreateUser(json);
         setAccessToken(response);
         File jsonNewName = new File("src/test/resources/userNewName.json");
         testNegative(responseUpdateWithoutAuthorization(jsonNewName));

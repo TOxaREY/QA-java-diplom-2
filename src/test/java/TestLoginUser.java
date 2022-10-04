@@ -45,7 +45,7 @@ public class TestLoginUser {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = Uri.BASEURI;
+        RestAssured.baseURI = Constants.BASEURI;
     }
 
     @Test
