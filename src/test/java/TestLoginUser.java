@@ -1,51 +1,27 @@
 import com.google.gson.Gson;
 import io.qameta.allure.junit4.DisplayName;
-import io.restassured.RestAssured;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import src.main.java.api.client.UserClient;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 
-import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
 
 @DisplayName("Тесты авторизации пользователя")
-public class TestLoginUser {
+public class TestLoginUser extends BaseTest {
     private String accessToken;
-    private Response response(File json, String path) {
-        return given().header("Content-type", "application/json")
-                .and()
-                .body(json)
-                .when()
-                .post("/api/auth/" + path);
-    }
-    private void setAccessToken(Response response) {
-        JsonPath jsonPathEvaluator = response.jsonPath();
-        accessToken = jsonPathEvaluator.get("accessToken").toString();
-    }
-
-    private void testNegative(Response response) {
-        response.then().assertThat()
-                .statusCode(401)
-                .and()
-                .body("success", is(false))
-                .and()
-                .body("message", equalTo("email or password are incorrect"));
-    }
-
     Gson g = new Gson();
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = Constants.BASEURI;
+        super.setUp();
     }
 
     @Test
@@ -54,9 +30,11 @@ public class TestLoginUser {
         File json = new File("src/test/resources/userFull.json");
         BufferedReader br = new BufferedReader(new FileReader("src/test/resources/userFull.json"));
         User user = g.fromJson(br, User.class);
-        Response response = response(json, "register");
-        setAccessToken(response);
-        response(json, "login").then().assertThat()
+        UserClient userClient = new UserClient();
+        accessToken = userClient.setAccessToken(userClient.responseAuthorizationUser(json, "register"));
+        userClient.responseAuthorizationUser(json, "login")
+                .then()
+                .assertThat()
                 .statusCode(200)
                 .and()
                 .body("success", is(true))
@@ -75,9 +53,9 @@ public class TestLoginUser {
     public void testLoginWrongLogin() {
         File json = new File("src/test/resources/userFull.json");
         File jsonWrongLogin = new File("src/test/resources/userWrongName.json");
-        Response response = response(json, "register");
-        setAccessToken(response);
-        testNegative(response(jsonWrongLogin, "login"));
+        UserClient userClient = new UserClient();
+        accessToken = userClient.setAccessToken(userClient.responseAuthorizationUser(json, "register"));
+        userClient.testNegative401(userClient.responseAuthorizationUser(jsonWrongLogin, "login"));
     }
 
     @Test
@@ -85,22 +63,13 @@ public class TestLoginUser {
     public void testLoginWrongPassword()  {
         File json = new File("src/test/resources/userFull.json");
         File jsonWrongPassword = new File("src/test/resources/userWrongPassword.json");
-        Response response = response(json, "register");
-        setAccessToken(response);
-        testNegative(response(jsonWrongPassword, "login"));
+        UserClient userClient = new UserClient();
+        accessToken = userClient.setAccessToken(userClient.responseAuthorizationUser(json, "register"));
+        userClient.testNegative401(userClient.responseAuthorizationUser(jsonWrongPassword, "login"));
     }
 
     @After
     public void tearDown() {
-        if (accessToken != null) {
-            Response responseDelete =
-                    given().header("Authorization", accessToken)
-                            .when()
-                            .delete("/api/auth/user");
-            int statusId = responseDelete.statusCode();
-            if (statusId != 202) {
-                System.out.println("Не удалось удалить пользователя");
-            }
-        }
+        super.tearDown(accessToken);
     }
 }
